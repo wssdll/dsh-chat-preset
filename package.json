@@ -27,7 +27,9 @@
   "files": [
     "cordis.patch.yml",
     "guard-tools.js",
-    "README.md"
+    "README.md",
+    "screenshot-1.png",
+    "screenshot-2.png"
   ],
   "exports": {
     "./guard-tools": "./guard-tools.js"
