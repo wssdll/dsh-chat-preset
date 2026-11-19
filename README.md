@@ -76,10 +76,10 @@ DSH 的工具分两层注册：
 插件市场安装，或：
 
 ```sh
-dsh plugin --profile <name> add @wssdll/dsh-chat-preset
+dsh plugin --profile desktop add github:wssdll/dsh-chat-preset
 ```
 
-本地开发时把仓库路径加进去即可。装完**重启 DSH**，新建会话时选「聊天模式」。
+如果你用的是其他 profile，把 `desktop` 换成对应的 profile 名即可。本地开发时把仓库路径加进去即可。装完**重启 DSH**，新建会话时选「聊天模式」。
 
 ## 人设
 
