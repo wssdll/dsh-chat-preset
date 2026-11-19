@@ -10,7 +10,7 @@
       config:
         id: chatmode
         name: 聊天模式
-        description: 纯净聊天，极小上下文，中文思维链，最低消耗。仅支持联网搜索、打开网页、读取拖入的文档和图片；完全屏蔽非 Agent 层面的其他工具（注：部分第三方插件从 Agent 层面注入的工具链可能无法屏蔽，从而增加消耗）。
+        description: 纯净聊天，极小上下文，中文思维链，最低消耗。仅支持联网搜索、打开网页、读取拖入的文档和图片，完全屏蔽其他工具。
         order: 6
         plugins:
           # `complete: true` makes this prefix the entire system prompt:
