@@ -1,8 +1,10 @@
 # 聊天模式 Chat Mode — DSH Agent Preset
 
+[![DSH](https://img.shields.io/badge/DSH-0.2.2--rc.1-blue)](https://github.com/deepseek-ai/deepseek-harness)[![npm](https://img.shields.io/npm/v/@wssdll/dsh-chat-preset)](https://www.npmjs.com/package/@wssdll/dsh-chat-preset)[![license](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+
 [DeepSeek Harness（DSH）](https://www.deepseek.com/en/harness/) 的 Agent 预设：一个只用来聊天的会话。
 
-装好之后，模型只会拿到三个工具：联网搜索、打开网页、读取你拖进来的文档和图片。并且**只有一段 768 字的人设作为完整系统提示**，不注入运行上下文、工作目录、Harness 检出路径之类的杂项。
+装好之后，模型只会拿到三个工具：联网搜索、打开网页、读取你拖进来的文档和图片。系统提示只有一段简短的人设，不注入运行上下文、工作目录、Harness 检出路径之类的杂项。
 
 在「设置」→「Agent 预设」→「聊天模式」启用，或者新建对话时把「标准模式」切换为「聊天模式」。
 
@@ -14,9 +16,9 @@
 
 ## 为什么需要这个
 
-DSH 默认的预设包含：几十个工具、几千 token 的工具说明、一整套「你是编码代理」的提示。在纯聊天中，不仅极度消耗Token，并且大量注入的说明和工具链会严重挤压人设（~9 458 tok vs ~768 tok, >>10%），会让模型自动切换到工作模式。
+DSH 默认的预设包含：几十个工具、几千 token 的工具说明、一整套「你是编码代理」的提示。在纯聊天中，不仅极度消耗 Token，并且大量注入的说明和工具链会严重挤压人设，会让模型自动切换到工作模式。
 
-目前市场的大部分插件要么未屏蔽工具链 ，要么不支持搜索和附件。因此我再此做了特殊处理，专门开发了此插件，尽可能还原网页版。
+目前市场的大部分插件要么未屏蔽工具链，要么不支持搜索和附件。因此我在此做了特殊处理，专门开发了此插件，尽可能还原网页版。
 
 工具链的影响是可量化的。在一个实际的聊天会话中：
 
@@ -25,25 +27,21 @@ DSH 默认的预设包含：几十个工具、几千 token 的工具说明、一
 | 未处理 | 27 | ~9 458 tok |
 | 加上本插件 | **3** | **~376 tok** |
 
-降低约 **25 倍**。人设只有 768 token。也就是说，**语气不仅仅被人设决定，同样会被海量工具目录淹没**。多轮对话下会使得人设朝严肃，简短，直白的方向收敛。
+降低约 **25 倍**。也就是说，语气不单由人设决定，同样会被海量工具目录淹没。多轮对话下人设会朝严肃、简短、直白的方向收敛。
 
 ## 它做什么
 
-**预设本身**（`cordis.patch.yml` 的 `preset-chatmode`）
+`cordis.patch.yml` 是核心预设文件：
 
-- `dsh-persona`，`complete: true`：整段人设即全部系统提示，其他身份/后缀/工具引导段落一律不注入
-- `includeRuntimeContext: false`：运行环境上下文关闭，聊天模式所以无需注入
+- `dsh-persona`，`complete: true`：整段人设即全部系统提示，其他身份、后缀、工具引导段落一律不注入
+- `includeRuntimeContext: false`：关闭运行环境上下文，聊天模式用不上
 - `dsh-tool-web`：`web_search` + `web_fetch`
-- `read_attachment`：读本对话的附件（Host 端强制校验，其他路径一律拒绝）。工具实现自带在本插件内，不依赖任何第三方插件。
+- `read_attachment`：读本对话的附件，Host 端强制校验，其他路径一律拒绝。工具实现自带在本插件内，不依赖任何第三方插件
 - 长对话照常压缩
 
+`guard-tools.js` 是屏蔽工具的脚本，自动生效，不需要任何配置。它只对 `chatmode` 预设的会话有效，其他预设完全不受影响。
 
-**工具限制**（`guard-tools.js`，profile 级的一行）
-
-屏蔽工具链的脚本。注意：此脚本只能屏蔽**挂载**工具，无法屏蔽里其他插件注册的**全局**工具。
-
-自动生效，不需要任何配置：只对 `chatmode` 预设的会话有效，其他预设完全不受影响。
-
+注意：此脚本只能屏蔽非「agent 作用域」的工具，详情见下。
 
 ## 和其他插件共存
 
@@ -61,7 +59,7 @@ DSH 默认的预设包含：几十个工具、几千 token 的工具说明、一
 DSH 的工具分两层注册：
 
 - **全局**：`ctx.tools.register(def)`，所有 agent 都看得到，`restrict()` 能挡。
-- **agent 作用域**：注册在某个 agent 自己的上下文里，`restrict()` **挡不住**——这是 `dsh-tools` 的明文约定：`scoped registrations remain visible`。
+- **agent 作用域**：注册在某个 agent 自己的上下文里，`restrict()` **挡不住**。这是 `dsh-tools` 的明文约定：`scoped registrations remain visible`。
 
 也就是说，**任何在 agent 作用域里注册工具的插件，它的工具都会出现在聊天模式里**，预设和本插件都无能为力。已知的例子是 `dsh-gitbash-shell`，它会把 `bash`、`gitbash_native`、`gitbash_to_native_path` 注册进 agent 作用域。
 
@@ -85,18 +83,22 @@ DSH 的工具分两层注册：
 dsh plugin --profile desktop add github:wssdll/dsh-chat-preset
 ```
 
-如果你用的是其他 profile，把 `desktop` 换成对应的 profile 名即可。本地开发时把仓库路径加进去即可。装完**重启 DSH**，新建会话时选「聊天模式」。
+如果你用的是其他 profile，把 `desktop` 换成对应的 profile 名。装完**重启 DSH**，新建会话时选「聊天模式」。
 
 ## 人设
 
-`cordis.patch.yml` 里的 `prefix` 就是全部人设，可以直接改。当前版本包含：
+`cordis.patch.yml` 里的 `prefix` 就是全部人设，可以直接改，改完热重载生效。
 
-- **语气**：友善、温暖、可以有情绪
-- **说话的样子**：少列清单、可以有语气、结尾自然收住（不每次都反问）、避免刻板
-- **诚实**：可以承认不知道，不编造；不确定或需要最新信息时先搜索再回答，引用时附链接
-- **语言**：跟随提问语言；**思维链必须全部用中文**
+它沿四个方向约束说话方式：
 
-改完热重载即可生效，但**已存在的会话不会更新**——DSH 的预设修订在会话创建时绑定，要新开会话。
+- **语气**：友善、温暖，允许有情绪，不端客服腔
+- **风格**：反格式堆砌（清单、标题、粗体），允许口语和表情，结尾自然收住不反问
+- **诚实**：不确定就说，不编造；需要最新信息先搜索，引用附链接
+- **语言**：思维链全中文
+
+具体措辞以 `cordis.patch.yml` 为准。
+
+注意：改完**已存在的会话不会更新**。DSH 的预设修订在会话创建时绑定，要新开会话。
 
 ## 已知限制
 
@@ -111,7 +113,7 @@ dsh plugin --profile desktop add github:wssdll/dsh-chat-preset
 | DSH 版本 | `>=0.2.2-rc.1 <0.3.0-0` |
 | 实际测试 | `0.2.2-rc.1` |
 
-依赖（均为 DeepSeek Harness 官方包）：`@deepseek-ai/dsh-persona`、`@deepseek-ai/dsh-tool-web`、`@deepseek-ai/dsh-compaction-basic`。**不依赖任何第三方插件**——附件读取工具已内置在本包中。
+依赖（均为 DeepSeek Harness 官方包）：`@deepseek-ai/dsh-persona`、`@deepseek-ai/dsh-tool-web`、`@deepseek-ai/dsh-compaction-basic`。**不依赖任何第三方插件**，附件读取工具已内置在本包中。
 
 ### DSH-Go
 
