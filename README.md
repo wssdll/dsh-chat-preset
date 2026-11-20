@@ -34,7 +34,7 @@ DSH 默认的预设包含：几十个工具、几千 token 的工具说明、一
 - `dsh-persona`，`complete: true`：整段人设即全部系统提示，其他身份/后缀/工具引导段落一律不注入
 - `includeRuntimeContext: false`：运行环境上下文关闭，聊天模式所以无需注入
 - `dsh-tool-web`：`web_search` + `web_fetch`
-- `read_attachment`：读本对话的附件（Host 端强制校验，其他路径一律拒绝）
+- `read_attachment`：读本对话的附件（Host 端强制校验，其他路径一律拒绝）。工具实现自带在本插件内，不依赖任何第三方插件。
 - 长对话照常压缩
 
 
@@ -111,6 +111,16 @@ dsh plugin --profile desktop add github:wssdll/dsh-chat-preset
 | DSH 版本 | `>=0.2.2-rc.1 <0.3.0-0` |
 | 实际测试 | `0.2.2-rc.1` |
 
-依赖 `@deepseek-ai/dsh-persona`、`@deepseek-ai/dsh-tool-web`、`@deepseek-ai/dsh-compaction-basic`。
+依赖（均为 DeepSeek Harness 官方包）：`@deepseek-ai/dsh-persona`、`@deepseek-ai/dsh-tool-web`、`@deepseek-ai/dsh-compaction-basic`。**不依赖任何第三方插件**——附件读取工具已内置在本包中。
+
+### DSH-Go
+
+在 [DSH-Go](https://github.com/ccch1mneyyy/dsh-Go) 的本机引擎里，用它的「终端」执行（App 启动引擎用的 profile 是 `web`）：
+
+```sh
+dsh plugin --profile web add github:wssdll/dsh-chat-preset
+```
+
+装完即可在「Agent 预设」里看到「聊天模式」。如果显示「加载失败/不可用」，通常是内置引擎版本低于 `0.2.2-rc.1` 导致 `engines.dsh` 不满足；可查看引擎日志确认 DSH 版本。
 
 工具限制用到的 `agent-preset/selected`、`tools.restrict()`、`tools/change` 三个接口在整个 0.2.x 期间没有出现在任何升级指南里，但它们属于工具层。`v0.2.1-rc.2` 引入了 `ResolvedToolSet` 并重构了工具声明时序，所以更早的 0.2.0 版本不保证可用，版本下限就定在这里。

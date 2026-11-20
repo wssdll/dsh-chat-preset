@@ -10,7 +10,7 @@
       config:
         id: chatmode
         name: 聊天模式
-        description: 纯净聊天，极小上下文，中文思维链，最低消耗。仅支持联网搜索、打开网页、读取拖入的文档和图片，完全屏蔽其他工具。
+        description: 纯净聊天，极小上下文，中文思维链，最低消耗。仅支持联网搜索、打开网页、读取拖入的文档和图片；完全屏蔽非 Agent 层面的其他工具（注：部分第三方插件从 Agent 层面注入的工具链可能无法屏蔽，从而增加消耗）。
         order: 6
         plugins:
           # `complete: true` makes this prefix the entire system prompt:
@@ -62,9 +62,10 @@
               fetch: true
               searchTimeoutMs: 60000
           # Reads a file the user attached to *this* chat; the Host refuses
-          # every other path. Provided by the installed dsh-chat-mode plugin.
-          - id: chat-read-attachment
-            name: '@mercurynomercy/dsh-chat-mode/read-attachment'
+          # every other path. Self-contained in this bundle — no third-party
+          # plugin needed, so it also loads in DSH-Go's phone engine.
+          - id: chatmode-read-attachment
+            name: '@wssdll/dsh-chat-preset/read-attachment'
           # NOTE: a preset cannot remove the profile's own global tools
           # (computer use, shell, todo, subagents…). They still reach chat
           # sessions and their schemas dominate the context. See README.md.

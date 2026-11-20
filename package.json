@@ -27,12 +27,14 @@
   "files": [
     "cordis.patch.yml",
     "guard-tools.js",
-    "README.md",
+    "read-attachment.js",
     "screenshot-1.png",
-    "screenshot-2.png"
+    "screenshot-2.png",
+    "README.md"
   ],
   "exports": {
-    "./guard-tools": "./guard-tools.js"
+    "./guard-tools": "./guard-tools.js",
+    "./read-attachment": "./read-attachment.js"
   },
   "dsh": {
     "bundle": {
