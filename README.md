@@ -2,11 +2,18 @@
 
 [![DSH](https://img.shields.io/badge/DSH-0.2.2--rc.1-blue)](https://github.com/deepseek-ai/deepseek-harness)[![npm](https://img.shields.io/npm/v/@wssdll/dsh-chat-preset)](https://www.npmjs.com/package/@wssdll/dsh-chat-preset)[![license](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-[DeepSeek Harness（DSH）](https://www.deepseek.com/en/harness/) 的 Agent 预设：一个只用来聊天的会话。
+[DeepSeek Harness（DSH）](https://www.deepseek.com/en/harness/) 的聊天专用预设，目标是把网页版那种聊天体验搬进 DSH。
 
-装好之后，模型只会拿到三个工具：联网搜索、打开网页、读取你拖进来的文档和图片。系统提示只有一段简短的人设，不注入运行上下文、工作目录、Harness 检出路径之类的杂项。
+**省 Token**。工具从几十个压到三个，工具 schema 从约 9 458 tok 降到约 376 tok，降低约 25 倍。系统提示只剩一段简短人设，不注入运行上下文、工作目录、Harness 检出路径这类杂项。
 
-在「设置」→「Agent 预设」→「聊天模式」启用，或者新建对话时把「标准模式」切换为「聊天模式」。
+**能搜索、能看附件**。保留联网搜索、打开网页、读取拖入的文档和图片。不是为了让模型不干活，而是不让工具目录淹没语气。
+
+**中文思维链**。内部推理固定用简体中文，回答语言跟随提问。
+
+**尽量还原网页版**。去掉了「你是编码代理」这类工作提示，人设专注语气和说话方式，多轮对话下来不会越聊越像在汇报工作。
+
+安装后在「设置」→「Agent 预设」→「聊天模式」启用，或新建对话时把「标准模式」切换为「聊天模式」。
+
 
 ## 截图
 
@@ -14,34 +21,49 @@
 
 ![聊天模式效果预览 2](screenshot-2.png)
 
+## 安装
+
+**插件市场**：在 DSH 的「插件市场（dsh-market）」搜索 `dsh-chat-preset`。
+
+**命令行**：
+
+```sh
+# 桌面端
+dsh plugin --profile desktop add @wssdll/dsh-chat-preset
+# DSH-Go / 网页端
+dsh plugin --profile web add @wssdll/dsh-chat-preset
+```
+
 ## 为什么需要这个
 
-DSH 默认的预设包含：几十个工具、几千 token 的工具说明、一整套「你是编码代理」的提示。在纯聊天中，不仅极度消耗 Token，并且大量注入的说明和工具链会严重挤压人设，会让模型自动切换到工作模式。
+DSH 默认的预设是给干活设计的：几十个工具、几千 token 的工具说明、一整套「你是编码代理」的提示。这些内容在写代码时有用，但在纯聊天里会持续消耗 Token，并且把人设挤到边缘。
 
-目前市场的大部分插件要么未屏蔽工具链，要么不支持搜索和附件。因此我在此做了特殊处理，专门开发了此插件，尽可能还原网页版。
-
-工具链的影响是可量化的。在一个实际的聊天会话中：
+实际聊天会话的测量：
 
 | | 工具数 | 工具 schema |
 |---|---|---|
 | 未处理 | 27 | ~9 458 tok |
 | 加上本插件 | **3** | **~376 tok** |
 
-降低约 **25 倍**。也就是说，语气不单由人设决定，同样会被海量工具目录淹没。多轮对话下人设会朝严肃、简短、直白的方向收敛。
+实际上语气不仅仅由人设决定，同样会受到工具链的影响。
 
-## 它做什么
+工具链越多，多轮对话下人设越容易朝严肃、简短、直白的方向收敛。
+
+目前市场上的类似插件，要么没有屏蔽工具链，要么不支持搜索和附件。
+
+## 它做了什么
 
 `cordis.patch.yml` 是核心预设文件：
 
 - `dsh-persona`，`complete: true`：整段人设即全部系统提示，其他身份、后缀、工具引导段落一律不注入
 - `includeRuntimeContext: false`：关闭运行环境上下文，聊天模式用不上
 - `dsh-tool-web`：`web_search` + `web_fetch`
-- `read_attachment`：读本对话的附件，Host 端强制校验，其他路径一律拒绝。工具实现自带在本插件内，不依赖任何第三方插件
+- `read_attachment`：读本对话的附件，Host 端强制校验，其他路径一律拒绝。
 - 长对话照常压缩
 
 `guard-tools.js` 是屏蔽工具的脚本，自动生效，不需要任何配置。它只对 `chatmode` 预设的会话有效，其他预设完全不受影响。
 
-注意：此脚本只能屏蔽非「agent 作用域」的工具，详情见下。
+注意：此脚本只能屏蔽非「agent 作用域」的工具，详情见下面的「和其他插件共存」。
 
 ## 和其他插件共存
 
@@ -75,36 +97,21 @@ DSH 的工具分两层注册：
 
 不过最稳妥的做法仍是：**装完插件重启 DSH，再开聊天会话。**
 
-## 启用
-
-插件市场安装，或：
-
-```sh
-dsh plugin --profile desktop add github:wssdll/dsh-chat-preset
-```
-
-如果你用的是其他 profile，把 `desktop` 换成对应的 profile 名。装完**重启 DSH**，新建会话时选「聊天模式」。
-
 ## 人设
 
 `cordis.patch.yml` 里的 `prefix` 就是全部人设，可以直接改，改完热重载生效。
 
 它沿四个方向约束说话方式：
 
-- **语气**：友善、温暖，允许有情绪，不端客服腔
-- **风格**：反格式堆砌（清单、标题、粗体），允许口语和表情，结尾自然收住不反问
-- **诚实**：不确定就说，不编造；需要最新信息先搜索，引用附链接
+- **语气**：友善、温暖，允许有情绪
+- **风格**：反格式堆砌（清单、标题、粗体），允许口语和表情
+- **诚实**：允许说不知道，不随意编造，需要最新信息会搜索。
 - **语言**：思维链全中文
 
 具体措辞以 `cordis.patch.yml` 为准。
 
-注意：改完**已存在的会话不会更新**。DSH 的预设修订在会话创建时绑定，要新开会话。
+注意：改完**已存在的会话不会更新**。DSH 的预设修订在会话创建时绑定，需要新开会话。
 
-## 已知限制
-
-- 只能屏蔽**全局**工具；agent 作用域注册的工具需要关掉对应插件（见「和其他插件共存」）
-- 只覆盖 `chatmode`（想覆盖别的预设，改 `guard-tools.js` 的 `PRESETS`）
-- 会话中途切换预设不保证重新计算
 
 ## 兼容性
 
@@ -115,14 +122,15 @@ dsh plugin --profile desktop add github:wssdll/dsh-chat-preset
 
 依赖（均为 DeepSeek Harness 官方包）：`@deepseek-ai/dsh-persona`、`@deepseek-ai/dsh-tool-web`、`@deepseek-ai/dsh-compaction-basic`。**不依赖任何第三方插件**，附件读取工具已内置在本包中。
 
-### DSH-Go
+工具限制用到的 `agent-preset/selected`、`tools.restrict()`、`tools/change` 三个接口在整个 0.2.x 期间没有出现在任何升级指南里，但它们属于工具层。`v0.2.1-rc.2` 引入了 `ResolvedToolSet` 并重构了工具声明时序，所以更早的 0.2.0 版本不保证可用，版本下限就定在这里。
+
+### DSH-Go 支持
 
 在 [DSH-Go](https://github.com/ccch1mneyyy/dsh-Go) 的本机引擎里，用它的「终端」执行（App 启动引擎用的 profile 是 `web`）：
 
 ```sh
-dsh plugin --profile web add github:wssdll/dsh-chat-preset
+dsh plugin --profile web add @wssdll/dsh-chat-preset
 ```
 
-装完即可在「Agent 预设」里看到「聊天模式」。如果显示「加载失败/不可用」，通常是内置引擎版本低于 `0.2.2-rc.1` 导致 `engines.dsh` 不满足；可查看引擎日志确认 DSH 版本。
+装完点「新对话」-「预设」即可看到「聊天模式」。如果显示「加载失败/不可用」，通常是内置引擎版本低于 `0.2.2-rc.1` 导致 `engines.dsh` 不满足；可查看引擎日志确认 DSH 版本。
 
-工具限制用到的 `agent-preset/selected`、`tools.restrict()`、`tools/change` 三个接口在整个 0.2.x 期间没有出现在任何升级指南里，但它们属于工具层。`v0.2.1-rc.2` 引入了 `ResolvedToolSet` 并重构了工具声明时序，所以更早的 0.2.0 版本不保证可用，版本下限就定在这里。
