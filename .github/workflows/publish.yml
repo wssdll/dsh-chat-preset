@@ -5,7 +5,10 @@ name: Publish to npm
 # leak. Requires the trusted publisher configured on npmjs.com with exactly
 # these coordinates:
 #   owner: wssdll   repository: dsh-chat-preset   workflow: publish.yml
-# and the npm CLI >= 11.5.1 (implied by actions/setup-node@v4 with node 22).
+#
+# npm CLI >= 11.5.1 is required. Node 22 ships npm 10.9.x, which fails OIDC
+# with a misleading "404 Not Found - PUT" instead of an auth error, so the
+# version is upgraded explicitly and printed below.
 
 on:
   release:
@@ -27,8 +30,10 @@ jobs:
           node-version: '22'
           registry-url: 'https://registry.npmjs.org'
 
-      # Printed because a mismatch here is the most common trusted-publishing
-      # failure: npm requires CLI >= 11.5.1 and Node >= 22.14.0.
+      # Node 22 bundles npm 10.9.x; trusted publishing needs >= 11.5.1.
+      - name: Upgrade npm for trusted publishing
+        run: npm install -g npm@^11.5.1
+
       - name: Show toolchain versions
         run: |
           node -v
