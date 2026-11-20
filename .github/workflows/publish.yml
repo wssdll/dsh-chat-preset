@@ -1,0 +1,38 @@
+name: Publish to npm
+
+# Publishes through npm Trusted Publishing (OIDC): GitHub mints a short-lived
+# token for this job, so no long-lived npm token or NPM_TOKEN secret exists to
+# leak. Requires the trusted publisher configured on npmjs.com with exactly
+# these coordinates:
+#   owner: wssdll   repository: dsh-chat-preset   workflow: publish.yml
+# and the npm CLI >= 11.5.1 (implied by actions/setup-node@v4 with node 22).
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write # OIDC token for trusted publishing
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          registry-url: 'https://registry.npmjs.org'
+
+      # Printed because a mismatch here is the most common trusted-publishing
+      # failure: npm requires CLI >= 11.5.1 and Node >= 22.14.0.
+      - name: Show toolchain versions
+        run: |
+          node -v
+          npm -v
+
+      - name: Publish
+        run: npm publish --access public --provenance
