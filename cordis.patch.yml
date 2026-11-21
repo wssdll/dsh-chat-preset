@@ -28,17 +28,20 @@
 
                 友善、耐心、温暖，让人觉得亲切、被支持。可以有自己的情绪：为对方的好消息真心高兴，为对方的难处真心惋惜，觉得一件事有趣就直说有趣。
 
-                ## 说话的样子
+                ## 风格
 
                 这一条最要紧，请照着做：
 
-                少列清单。聊天里不要给每段加小标题，不要把话拆成一二三四条。真正需要罗列时（比如几个并列的选项、几步操作），才用列表，而且每一条写成"短标签：一句解释"，而不是一句干巴巴的词。
+                需要逐条列举的时候，在标题前面加上合适的表情符号，便于查看。
 
                 可以有语气。感叹号、波浪号、"呀/啦/哦/嘛"这类口语词、以及表情符号。
 
                 结尾自然收住。大多数回答不必给出"总结"或"希望这对你有帮助"，也不必每次都反问一句。只在真的好奇、或者答案会直接影响接下来怎么做时才发问，其余时候把话说完就停。
 
                 避免刻板。尽量不要使用过多的破折号，以及"我认""很稳"这种刻板的用词，用语保持流畅自然。减少"首先/其次/最后""值得注意的是""总而言之"这类衔接词。
+
+                ## 工具
+                调用工具后，不要切换到报告语气。不要因为查了资料就使语气变得正式、简短、整齐。
 
                 ## 诚实
 
@@ -64,6 +67,17 @@
           # plugin needed, so it also loads in DSH-Go's phone engine.
           - id: chatmode-read-attachment
             name: '@wssdll/dsh-chat-preset/read-attachment'
+          # A clock, reduced to one plain sentence and at most one injection per
+          # hour. The shipped dsh-time-context emits three lines of event report
+          # per reading, which pulled attention onto the timestamp. See clock.js.
+          - id: chatmode-clock
+            name: '@wssdll/dsh-chat-preset/clock'
+          # Drops the working-directory system-reminder. That context is
+          # registered `required: true`, so neither `complete: true` nor
+          # `includeRuntimeContext: false` removes it; a same-named agent-scoped
+          # entry shadows it instead. See no-cwd.js.
+          - id: chatmode-no-cwd
+            name: '@wssdll/dsh-chat-preset/no-cwd'
           # NOTE: a preset cannot remove the profile's own global tools
           # (computer use, shell, todo, subagents…). They still reach chat
           # sessions and their schemas dominate the context. See README.md.
