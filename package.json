@@ -27,6 +27,7 @@
   },
   "files": [
     "cordis.patch.yml",
+    "index.js",
     "guard-tools.js",
     "read-attachment.js",
     "clock.js",
@@ -36,6 +37,7 @@
     "README.md"
   ],
   "exports": {
+    ".": "./index.js",
     "./guard-tools": "./guard-tools.js",
     "./read-attachment": "./read-attachment.js",
     "./clock": "./clock.js",
