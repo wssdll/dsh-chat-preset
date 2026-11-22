@@ -34,6 +34,53 @@ dsh plugin --profile desktop add @wssdll/dsh-chat-preset
 dsh plugin --profile web add @wssdll/dsh-chat-preset
 ```
 
+## 免费使用
+
+聊天模式自带的三个工具里，只有搜索会真的花钱：`web_search` 默认走 DeepSeek 官方通道，按 token 从 DeepSeek 余额里扣，即使对话本身用的是别家模型。模型这一头也一样，官方通道按量计费。
+
+两个第三方插件可以分别把这两笔省掉，它们都不是本预设的依赖，装不装都能正常用。
+
+### 搜索免费：dsh-free-search
+
+```sh
+dsh plugin --profile desktop add dsh-free-search
+```
+
+装完搜索改走免费引擎，不需要任何 API key。首选引擎失败会自动换下一个，被限流的那一个会冷却一段时间再回来。
+
+设置页在「插件」→「免费搜索」，可以选引擎、给某个引擎填 key、一键测试全部引擎。聊天框里输入 `/free-search-engine` 也能直接弹出引擎切换窗口。
+
+要注意的是：免费引擎全部失败时它会回退到 DeepSeek 官方搜索，那一档是扣费的。不想让它回退过去，就把这两个引擎禁掉：
+
+```yaml
+- id: web-search-free
+  config:
+    disabledEngines:
+      - deepseek-official
+      - deepseek-tools
+    bingMarket: zh-CN
+```
+
+### 模型免费：dsh-connect-workbuddy
+
+```sh
+dsh plugin --profile desktop add dsh-connect-workbuddy
+```
+
+装完在「设置 → WorkBuddy」里扫码登录（国际版是浏览器登录，没有二维码），登录后 WorkBuddy 的模型会出现在模型选择器里，模型名后面跟着积分倍率，比如 `GLM-5.3 · x0.79`。倍率是 `x0` 的模型不扣积分，选择器上带「限免」「夜间折扣」徽标的会按上游活动实时改价。
+
+这个插件的原则写在它自己的说明里：每次调用花的是你自己账号的额度，不提供账号、不共享凭据、不绕过计费。
+
+### 两个一起用
+
+模型选 WorkBuddy 的免费档，搜索走免 key 引擎，整条链路就没有按量计费的部分了。附件读取和时间注入都由本预设自带，不额外花钱。
+
+风险也照实说：WorkBuddy 已经开始限制非官方客户端请求，上游一旦收紧，插件可能失效。这是这类工具的常态，账号风险请自行评估。
+
+### 关于上下文窗口
+
+这两个插件接进来的模型，上下文窗口通常比官方小。压缩阈值 `0.16` 是**比例**不是绝对值：窗口 1M 时约 16 万 token 触发，窗口 200K 时约 3.2 万就触发，压缩后保留 8% 原文。换成小窗口模型后压缩变勤属于正常现象，不需要改配置。
+
 ## 为什么需要这个
 
 DSH 默认的预设是给干活设计的：几十个工具、几千 token 的工具说明、一整套「你是编码代理」的提示。这些内容在写代码时有用，但在纯聊天里会持续消耗 Token，并且把人设挤到边缘。
@@ -140,4 +187,17 @@ dsh plugin --profile web add @wssdll/dsh-chat-preset
 ```
 
 装完点「新对话」-「预设」即可看到「聊天模式」。如果显示「加载失败/不可用」，通常是内置引擎版本低于 `0.2.2-rc.1` 导致 `engines.dsh` 不满足；可查看引擎日志确认 DSH 版本。
+
+### DSH-Go 上免费使用
+
+免费方案在 DSH-Go 上同样成立，前提是 App 连的是**本机引擎**：模型和搜索都跑在这台电脑上，WorkBuddy 的登录态也就在这里。DSH-Go 用的 profile 是 `web`，所以在它的「终端」里执行：
+
+```sh
+dsh plugin --profile web add dsh-free-search
+dsh plugin --profile web add dsh-connect-workbuddy
+```
+
+装完重启引擎，手机端新建对话时模型选择器里应该就能看到 WorkBuddy 的模型，搜索也走免费引擎。WorkBuddy 的登录在电脑上完成，插件读的是本机的登录态。
+
+如果 DSH-Go 连的是云端引擎，就没有本机的 WorkBuddy 登录态，模型那一半用不了；搜索那一半仍然有效，因为免费搜索插件本身不需要登录。
 
