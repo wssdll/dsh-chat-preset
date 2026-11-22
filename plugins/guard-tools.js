@@ -4,9 +4,14 @@
 // profile's other plugins register globally (computer use, dsh-ops, the shell,
 // todo, goals, subagents…). Every global tool reaches every agent with its full
 // schema in the request, and the catalogue — not the persona — ends up shaping
-// the replies. Measured on a real chat session before this guard: 27 tools,
-// ~9 458 tokens of schema, against an 860-character persona. After: 3 tools,
-// ~376 tokens.
+// the replies. Measured from `request/header` in real chat sessions: before this
+// guard, 27 tools and 30 357 bytes of schema (~7 589 tokens at bytes/4), against
+// an 860-character persona. After: 4 tools, 1 400 bytes (~350 tokens) — roughly
+// a 22× reduction.
+//
+// Keep this list in step with the preset's own `plugins:` rows. The two live in
+// different files, and a name that leaks in here without being mounted (or the
+// reverse) fails silently: the tool vanishes from the request with no error.
 //
 // Two constraints decide the shape of this file, both established by
 // measurement rather than by reading the docs alone:
@@ -38,7 +43,7 @@ export const PRESETS = ['chatmode']
  * the mask is computed is denied, so a newly installed plugin's tools are
  * excluded automatically without this list changing.
  */
-export const ALLOWED = ['web_search', 'web_fetch', 'read_attachment']
+export const ALLOWED = ['web_search', 'web_fetch', 'read', 'read_image']
 
 /** Visible tool names for one agent, or a diagnostic string on failure. */
 function visible(ctx, agent) {

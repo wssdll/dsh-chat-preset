@@ -4,9 +4,9 @@
 
 [DeepSeek Harness（DSH）](https://www.deepseek.com/en/harness/) 的聊天专用预设，目标是把网页版那种聊天体验搬进 DSH。
 
-**省 Token**。工具从几十个压到三个，工具 schema 从约 9 458 tok 降到约 376 tok，降低约 25 倍。系统提示只剩一段简短人设，不注入运行上下文、工作目录、Harness 检出路径这类杂项。
+**省 Token**。工具从几十个压到四个，工具 schema 从约 7 589 tok 降到约 350 tok，降低约 22 倍。系统提示只剩一段简短人设，不注入运行上下文、工作目录、Harness 检出路径这类杂项。
 
-**保留搜索、支持附件**。保留联网搜索、打开网页、读取拖入的文档和图片。单独实现的文件读取插件，仅一行，降低工具链影响。
+**保留搜索、支持读文件**。保留联网搜索、打开网页、读取文档和图片。读文件用官方 `dsh-tool-fs`，只开 `read` 与 `read_image`，写入、编辑、打补丁全部关闭。
 
 **时间戳**。单独实现的时间注入插件，仅一行，降低工具链影响。
 
@@ -60,8 +60,8 @@ DSH 默认的预设是给干活设计的：几十个工具、几千 token 的工
 
 | | 工具数 | 工具 schema |
 |---|---|---|
-| 未处理 | 27 | ~9 458 tok |
-| 加上本插件 | **3** | **~376 tok** |
+| 未处理 | 27 | ~7 589 tok |
+| 加上本插件 | **4** | **~350 tok** |
 
 实际上语气不仅仅由人设决定，同样会受到工具链的影响。
 
@@ -76,7 +76,7 @@ DSH 默认的预设是给干活设计的：几十个工具、几千 token 的工
 - `dsh-persona`，`complete: true`：整段人设即全部系统提示，其他身份、后缀、工具引导段落一律不注入
 - `includeRuntimeContext: false`：关闭运行环境上下文，聊天模式用不上
 - `dsh-tool-web`：`web_search` + `web_fetch`
-- `read_attachment`：读本对话的附件，Host 端强制校验，其他路径一律拒绝
+- `dsh-tool-fs`：只开 `read` 与 `read_image`，`write`、`edit`、`apply_patch` 全部关闭。读文件走 `ctx.fs`，和标准模式同一个 seam，路径由 Host 解析，不受工作区限制
 - `compaction-basic`：`thresholdRatio: 0.16` + `retainRatio: 0.08`：压缩阈值由 `0.8` 调整为 `0.16`，即 16% 上下文触发压缩，压缩后保留 8% 上下文。避免过高的消耗。实际上纯聊天很难达到 80% 上下文，如果有个人需要可以让 Agent 修改此参数。
 
 另外两个是本插件自带的补丁：
@@ -143,7 +143,7 @@ DSH 的工具分两层注册：
 | DSH 版本 | `>=0.2.2-rc.1 <0.3.0-0` |
 | 实际测试 | `0.2.2-rc.1` |
 
-依赖（均为 DeepSeek Harness 官方包）：`@deepseek-ai/dsh-persona`、`@deepseek-ai/dsh-tool-web`、`@deepseek-ai/dsh-compaction-basic`。**不依赖任何第三方插件**，附件读取和时间注入都由本包自带。
+依赖（均为 DeepSeek Harness 官方包）：`@deepseek-ai/dsh-persona`、`@deepseek-ai/dsh-tool-web`、`@deepseek-ai/dsh-tool-fs`、`@deepseek-ai/dsh-compaction-basic`。**不依赖任何第三方插件**，时间注入和工作目录屏蔽由本包自带。
 
 `plugins/no-cwd.js` 通过 `ctx.systemPrompt.context()` 遮蔽工作目录那一节，需要 Host 提供 `systemPrompt` 服务；缺少它时这个补丁会加载失败，去掉预设里的 `chatmode-no-cwd` 那一行即可。
 

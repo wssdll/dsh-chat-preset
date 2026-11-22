@@ -1,16 +1,23 @@
 # Agent preset「聊天模式」/ "Chat mode": a plain conversation preset.
 # Nothing in the context beyond one persona and the three things chat needs:
-# web search, web fetch, and reading files the user attached to this chat.
-# No shell, no filesystem, no subagents, no workflows, no skills, no goals,
-# no todos, no plan mode, no plugin tools — and no runtime context, no
-# workspace/working-directory line, no harness dev context.
+# web search, web fetch, and reading a file the user points at.
+# No shell, no subagents, no workflows, no skills, no goals, no todos, no plan
+# mode, no plugin tools — and no runtime context, no workspace/working-directory
+# line, no harness dev context.
+#
+# File reading is the shipped `dsh-tool-fs` with only `read` enabled. An own
+# reader used to live here and accepted nothing outside the attachment store,
+# which broke every desktop drop: the desktop client hands a dropped document
+# over as a plain `@path` in the message, never as an uploaded attachment, so
+# the model followed a path the reader refused. `read` resolves through ctx.fs
+# instead, which is the same seam the standard preset uses.
 - insert:
     - id: preset-chatmode
       name: '@deepseek-ai/dsh-agent-preset'
       config:
         id: chatmode
         name: 聊天模式
-        description: 纯净聊天，极小上下文，中文思维链，最低消耗。仅支持联网搜索、打开网页、读取拖入的文档和图片；完全屏蔽非 Agent 层面的其他工具。
+        description: 纯净聊天，极小上下文，中文思维链，最低消耗。只保留联网搜索、打开网页、读取文件三个工具；完全屏蔽非 Agent 层面的其他工具。
         order: 6
         plugins:
           # `complete: true` makes this prefix the entire system prompt:
@@ -62,11 +69,25 @@
             config:
               fetch: true
               searchTimeoutMs: 60000
-          # Reads a file the user attached to *this* chat; the Host refuses
-          # every other path. Self-contained in this bundle — no third-party
-          # plugin needed, so it also loads in DSH-Go's phone engine.
-          - id: chatmode-read-attachment
-            name: '@wssdll/dsh-chat-preset/read-attachment'
+          # Reads a UTF-8 text file anywhere the user points at. Only the two
+          # readers are switched on: `write`, `edit` and `apply_patch` stay off,
+          # so the preset gains reading without gaining any way to change the
+          # disk.
+          #
+          # `readImage` stays on because a path can point at an image too: the
+          # tool pulls those bytes through the attachment store (saveImage) and
+          # hands back a normal image block, which is strictly better than
+          # teaching the model a second way to look at a file. It refuses when
+          # the active model route declares no image input, rather than
+          # returning something the model cannot read.
+          - id: tool-fs
+            name: '@deepseek-ai/dsh-tool-fs'
+            config:
+              read: true
+              readImage: true
+              write: false
+              edit: false
+              applyPatch: false
           # A clock, reduced to one plain sentence and at most one injection per
           # hour. The shipped dsh-time-context emits three lines of event report
           # per reading, which pulled attention onto the timestamp. See plugins/clock.js.
