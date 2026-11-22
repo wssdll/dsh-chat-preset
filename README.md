@@ -77,7 +77,7 @@ DSH 默认的预设是给干活设计的：几十个工具、几千 token 的工
 - `includeRuntimeContext: false`：关闭运行环境上下文，聊天模式用不上
 - `dsh-tool-web`：`web_search` + `web_fetch`
 - `read_attachment`：读本对话的附件，Host 端强制校验，其他路径一律拒绝
-- `compaction-basic`：`thresholdRatio: 0.16` + `retainRatio: 0.08`：压缩阈值由 `0.8` 调整为 `0.16`，即 16% 上下文触发压缩，压缩后会保留 8% 原文。避免过高的消耗。
+- `compaction-basic`：`thresholdRatio: 0.16` + `retainRatio: 0.08`：压缩阈值由 `0.8` 调整为 `0.16`，即 16% 上下文触发压缩，压缩后保留 8% 上下文。避免过高的消耗。实际上纯聊天很难达到 80% 上下文，如果有人需要可以让 Agent 修改此参数。
 
 另外两个是本插件自带的补丁：
 
