@@ -21,8 +21,26 @@ export const inject = ['timer']
 /** Inject at most once per hour; also the first step of a fresh session. */
 const REFRESH_MS = 60 * 60 * 1000
 
-/** Weekday names for the short suffix. */
+/** Weekday names for the short suffix, indexed by `getDay()` order. */
 const WEEKDAYS = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
+
+/**
+ * Build a formatter, dropping the zone when the host rejects it.
+ *
+ * An unusable zone must not break the step, so both fields fall back to the
+ * host's own zone together — never one each, which would pair a date from one
+ * zone with a weekday from another.
+ * @param {Intl.DateTimeFormatOptions} options
+ * @param {string} [timeZone]
+ * @returns {Intl.DateTimeFormat}
+ */
+function formatter(options, timeZone) {
+  try {
+    return new Intl.DateTimeFormat('zh-CN', { timeZone, ...options })
+  } catch {
+    return new Intl.DateTimeFormat('zh-CN', options)
+  }
+}
 
 /**
  * Render the reading. One line, no turn/step numbers, no policy text.
@@ -31,29 +49,22 @@ const WEEKDAYS = ['周日', '周一', '周二', '周三', '周四', '周五', '�
  * @returns {string}
  */
 export function renderClock(now, timeZone) {
-  let stamp
-  try {
-    stamp = new Intl.DateTimeFormat('zh-CN', {
-      timeZone,
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false,
-    }).format(now)
-  } catch {
-    // An unusable zone must not break the step; fall back to the host's own.
-    stamp = new Intl.DateTimeFormat('zh-CN', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false,
-    }).format(now)
+  const options = {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
   }
-  return `当前时间：${stamp}（${WEEKDAYS[now.getDay()]}）。`
+  const stamp = formatter(options, timeZone).format(now)
+  // The weekday is read in the same zone as the date. `now.getDay()` would
+  // answer for the host, so a host in UTC showing a Shanghai date would print
+  // Sunday's date with Saturday's name.
+  const weekday = formatter({ weekday: 'short' }, timeZone).format(now)
+  const index = WEEKDAYS.indexOf(weekday)
+  const label = index === -1 ? WEEKDAYS[now.getDay()] : weekday
+  return `当前时间：${stamp}（${label}）。`
 }
 
 /** Build the message the way @deepseek-ai/dsh-llm's createUserMessage does. */

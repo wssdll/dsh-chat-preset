@@ -77,11 +77,11 @@ DSH 默认的预设是给干活设计的：几十个工具、几千 token 的工
 - `includeRuntimeContext: false`：关闭运行环境上下文，聊天模式用不上
 - `dsh-tool-web`：`web_search` + `web_fetch`
 - `read_attachment`：读本对话的附件，Host 端强制校验，其他路径一律拒绝
-- `compaction-basic`：`thresholdRatio: 0.16` + `retainRatio: 0.08`：压缩阈值由 `0.8` 调整为 `0.16`，即 16% 上下文触发压缩，压缩后保留 8% 上下文。避免过高的消耗。实际上纯聊天很难达到 80% 上下文，如果有人需要可以让 Agent 修改此参数。
+- `compaction-basic`：`thresholdRatio: 0.16` + `retainRatio: 0.08`：压缩阈值由 `0.8` 调整为 `0.16`，即 16% 上下文触发压缩，压缩后保留 8% 上下文。避免过高的消耗。实际上纯聊天很难达到 80% 上下文，如果有个人需要可以让 Agent 修改此参数。
 
 另外两个是本插件自带的补丁：
 
-- `clock.js`：每小时注入一行 `当前时间：2026/11/21 23:41（周六）。`。官方的 `dsh-time-context` 每次注入三行技术描述（turn/step 编号、时区策略、距上条消息的耗时），实测会让模型把注意力放在时间戳上，所以换成了这一行纯事实。
+- `clock.js`：每小时注入一行 `当前时间：2026/11/21 23:41（周六）`。官方的 `dsh-time-context` 每次注入三行技术描述（turn/step 编号、时区策略、距上条消息的耗时），实测会让模型把注意力放在时间戳上，所以换成了这一行纯事实。
 - `no-cwd.js`：去掉工作目录的 system-reminder。`dsh-working-directory` 把这条注册成 `required: true`，`complete: true` 和 `includeRuntimeContext: false` 都拦不住它，只能在预设作用域里注册一个同名空条目把它遮掉。工作目录服务本身照常运行，其他模式不受影响。
 
 `guard-tools.js` 屏蔽工具的脚本，自动生效，不需要任何配置。它只对 `chatmode` 预设的会话有效，其他预设完全不受影响。
