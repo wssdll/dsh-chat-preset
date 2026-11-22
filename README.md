@@ -81,16 +81,16 @@ DSH 默认的预设是给干活设计的：几十个工具、几千 token 的工
 
 另外两个是本插件自带的补丁：
 
-- `clock.js`：每小时注入一行 `当前时间：2026/11/21 23:41（周六）`。官方的 `dsh-time-context` 每次注入三行技术描述（turn/step 编号、时区策略、距上条消息的耗时），实测会让模型把注意力放在时间戳上，所以换成了这一行纯事实。
-- `no-cwd.js`：去掉工作目录的 system-reminder。`dsh-working-directory` 把这条注册成 `required: true`，`complete: true` 和 `includeRuntimeContext: false` 都拦不住它，只能在预设作用域里注册一个同名空条目把它遮掉。工作目录服务本身照常运行，其他模式不受影响。
+- `plugins/clock.js`：每小时注入一行 `当前时间：2026/11/21 23:41（周六）`。官方的 `dsh-time-context` 每次注入三行技术描述（turn/step 编号、时区策略、距上条消息的耗时），实测会让模型把注意力放在时间戳上，所以换成了这一行纯事实。
+- `plugins/no-cwd.js`：去掉工作目录的 system-reminder。`dsh-working-directory` 把这条注册成 `required: true`，`complete: true` 和 `includeRuntimeContext: false` 都拦不住它，只能在预设作用域里注册一个同名空条目把它遮掉。工作目录服务本身照常运行，其他模式不受影响。
 
-`guard-tools.js` 屏蔽工具的脚本，自动生效，不需要任何配置。它只对 `chatmode` 预设的会话有效，其他预设完全不受影响。
+`plugins/guard-tools.js` 屏蔽工具的脚本，自动生效，不需要任何配置。它只对 `chatmode` 预设的会话有效，其他预设完全不受影响。
 
 注意：此脚本只能屏蔽非「agent 作用域」的工具，详情见下面的「和其他插件共存」。
 
 ## 和其他插件共存
 
-**判定方式是白名单。** `guard-tools.js` 的 `ALLOWED` 只有三个名字，其余无论从哪来，全部进 deny 列表。所以装了新插件，它的工具默认就被排除，不需要改这里。
+**判定方式是白名单。** `plugins/guard-tools.js` 的 `ALLOWED` 只有三个名字，其余无论从哪来，全部进 deny 列表。所以装了新插件，它的工具默认就被排除，不需要改这里。
 
 具体到一个工具的流向：
 
@@ -145,7 +145,7 @@ DSH 的工具分两层注册：
 
 依赖（均为 DeepSeek Harness 官方包）：`@deepseek-ai/dsh-persona`、`@deepseek-ai/dsh-tool-web`、`@deepseek-ai/dsh-compaction-basic`。**不依赖任何第三方插件**，附件读取和时间注入都由本包自带。
 
-`no-cwd.js` 通过 `ctx.systemPrompt.context()` 遮蔽工作目录那一节，需要 Host 提供 `systemPrompt` 服务；缺少它时这个补丁会加载失败，去掉预设里的 `chatmode-no-cwd` 那一行即可。
+`plugins/no-cwd.js` 通过 `ctx.systemPrompt.context()` 遮蔽工作目录那一节，需要 Host 提供 `systemPrompt` 服务；缺少它时这个补丁会加载失败，去掉预设里的 `chatmode-no-cwd` 那一行即可。
 
 工具限制用到的 `agent-preset/selected`、`tools.restrict()`、`tools/change` 三个接口在整个 0.2.x 期间没有出现在任何升级指南里，但它们属于工具层。`v0.2.1-rc.2` 引入了 `ResolvedToolSet` 并重构了工具声明时序，所以更早的 0.2.0 版本不保证可用，版本下限就定在这里。
 

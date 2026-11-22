@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="t">
+  <title id="t">聊天模式 / Chat Mode</title>
+  <!-- No tile: the shipped plugin icons that sit on a light list background are
+       line marks (dsh-usage is one colour, no plate). The gradient starts at a
+       pale blue and lands on the official accent so the mark stays light but
+       still reads at 32px. Stops come from the shipped palette: dsh-ops ships
+       #abc2ec, dsh-usage ships #4d6bfe. -->
+  <defs>
+    <linearGradient id="bubble" x1="0" y1="0" x2="0.35" y2="1">
+      <stop offset="0%" stop-color="#abc2ec"/>
+      <stop offset="100%" stop-color="#4d6bfe"/>
+    </linearGradient>
+  </defs>
+  <g fill="none" stroke="url(#bubble)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M38 28h52a16 16 0 0 1 16 16v24a16 16 0 0 1-16 16H64l-20 16v-16h-6a16 16 0 0 1-16-16V44a16 16 0 0 1 16-16z"/>
+  </g>
+  <circle cx="46" cy="56" r="5" fill="#8fa8f0"/>
+  <circle cx="64" cy="56" r="5" fill="#6f8dff"/>
+  <circle cx="82" cy="56" r="5" fill="#4d6bfe"/>
+</svg>

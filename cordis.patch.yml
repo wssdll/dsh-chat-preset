@@ -69,13 +69,13 @@
             name: '@wssdll/dsh-chat-preset/read-attachment'
           # A clock, reduced to one plain sentence and at most one injection per
           # hour. The shipped dsh-time-context emits three lines of event report
-          # per reading, which pulled attention onto the timestamp. See clock.js.
+          # per reading, which pulled attention onto the timestamp. See plugins/clock.js.
           - id: chatmode-clock
             name: '@wssdll/dsh-chat-preset/clock'
           # Drops the working-directory system-reminder. That context is
           # registered `required: true`, so neither `complete: true` nor
           # `includeRuntimeContext: false` removes it; a same-named agent-scoped
-          # entry shadows it instead. See no-cwd.js.
+          # entry shadows it instead. See plugins/no-cwd.js.
           - id: chatmode-no-cwd
             name: '@wssdll/dsh-chat-preset/no-cwd'
           # NOTE: a preset cannot remove the profile's own global tools
