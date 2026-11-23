@@ -116,16 +116,6 @@
             config:
               - id: compaction-basic
                 name: '@deepseek-ai/dsh-compaction-basic'
-                config:
-                  # Compact earlier than the shipped 0.8, which only fires near
-                  # 800k tokens on a 1M window and lets a chat session accumulate
-                  # history it never needs. 0.16 triggers around 160k, which in
-                  # practice means only chats kept alive past about a week.
-                  # retainRatio 0.08 keeps roughly 80k of verbatim tail, about
-                  # three days of heavy conversation, and must stay below
-                  # thresholdRatio or the plugin refuses to load.
-                  thresholdRatio: 0.16
-                  retainRatio: 0.08
               - id: command-compact
                 name: '@deepseek-ai/dsh-command-compact'
 

@@ -1,6 +1,6 @@
 {
   "meta": {
     "title": "Chat Mode",
-    "description": "A chat-only agent preset: three tools (web search, page fetch, attachment reading), a tiny context, and reasoning in Chinese."
+    "description": "A chat-only agent preset: four tools (web search, page fetch, file and image reading), a tiny context, and reasoning in Chinese."
   }
 }
