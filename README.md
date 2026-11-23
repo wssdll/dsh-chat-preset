@@ -1,6 +1,6 @@
 # 聊天模式 Chat Mode — DSH Agent Preset
 
-[![DSH](https://img.shields.io/badge/DSH-0.2.2--rc.1-blue)](https://github.com/deepseek-ai/deepseek-harness)[![npm](https://img.shields.io/npm/v/@wssdll/dsh-chat-preset)](https://www.npmjs.com/package/@wssdll/dsh-chat-preset)[![license](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+[![DSH](https://img.shields.io/badge/DSH-0.2.2--rc.5-blue)](https://github.com/deepseek-ai/deepseek-harness)[![npm](https://img.shields.io/npm/v/@wssdll/dsh-chat-preset)](https://www.npmjs.com/package/@wssdll/dsh-chat-preset)[![license](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 [DeepSeek Harness（DSH）](https://www.deepseek.com/en/harness/) 的聊天专用预设，目标是把网页版那种聊天体验搬进 DSH。
 
@@ -133,7 +133,7 @@ DSH 的工具分两层注册：
 | 项目 | 值 |
 |---|---|
 | DSH 版本 | `>=0.2.2-rc.1 <0.3.0-0` |
-| 实际测试 | `0.2.2-rc.1` |
+| 实际测试 | `0.2.2-rc.5` |
 
 依赖（均为 DeepSeek Harness 官方包）：`@deepseek-ai/dsh-persona`、`@deepseek-ai/dsh-tool-web`、`@deepseek-ai/dsh-tool-fs`、`@deepseek-ai/dsh-compaction-basic`。**不依赖任何第三方插件**，时间注入和工作目录屏蔽由本包自带。
 
