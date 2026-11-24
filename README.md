@@ -83,9 +83,29 @@ DSH 默认的预设是给干活设计的：几十个工具链、几千 Token 的
 - `plugins/no-cwd.js`：去掉工作目录的 system-reminder。`dsh-working-directory` 把这条注册成 `required: true`，`complete: true` 和 `includeRuntimeContext: false` 都拦不住它，只能在预设作用域里注册一个同名空条目把它遮掉。工作目录服务本身照常运行，其他模式不受影响。
 - `plugins/guard-tools.js` 屏蔽工具的脚本，自动生效，不需要任何配置。它只对 `chatmode` 预设的会话有效，其他预设完全不受影响。注意：此脚本只能屏蔽全局工具，对「作用域内注册」的工具无效，详情见下面的「和其他插件共存」。
 
+## 高级设置
+
+支持本地自定义配置，在你本地的 `cordis.patch.yml` 文件中添加设置。桌面端是 `%USERPROFILE%\.dsh\profiles\desktop\cordis.patch.yml`
+
+```
+# 聊天模式：在白名单（web_search / web_fetch / read / read_image）之外额外放行的工具。
+# 名字必须是全局注册的工具；写错不会报错，只是不生效。
+# 注意消耗，每个工具会按自己的 schema 计入请求 token。比如 `advanced_search` 是 240 tok，weather 是 40 tok
+# 下面是示例：增加了 advanced_search 和 weather 工具，添加后会话中会提供 6 个工具。
+- id: chatmode-tool-guard
+  name: '@wssdll/dsh-chat-preset/guard-tools'
+  config:
+    extraTools:
+      - advanced_search
+      - weather
+```
+- 修改后需要重启 DSH 客户端。
+- 修改对于旧会话同样生效。但有时候模型可能会不去检查工具，而是根据记忆回答或调用，最好加以提示。
+
+
 ## 和其他插件共存
 
-**判定方式是白名单。** `plugins/guard-tools.js` 的 `ALLOWED` 只有四个名字（`web_search`、`web_fetch`、`read`、`read_image`），其余无论从哪来，全部进 deny 列表。所以装了新插件，它的工具默认就被排除，不需要改这里。
+**判定方式是白名单。** `plugins/guard-tools.js` 的 `ALLOWED` 只有四个名字（`web_search`、`web_fetch`、`read`、`read_image`），其余无论从哪来全部屏蔽。所以装了新插件，它的工具默认就被排除，不需要改这里。
 
 具体到一个工具的流向：
 
@@ -115,7 +135,7 @@ DSH 的工具分两层注册：
 
 ## 人设
 
-`cordis.patch.yml` 里的 `prefix` 就是全部人设。
+插件目录中 `cordis.patch.yml` 文件里的 `prefix` 就是全部人设。
 
 它沿四个方向约束说话方式：
 

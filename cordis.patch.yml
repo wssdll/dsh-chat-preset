@@ -120,8 +120,21 @@
                 name: '@deepseek-ai/dsh-command-compact'
 
 # Profile-level guard: `agent/created` does not reach listeners registered in a
-# preset's shared revision, so the deny mask cannot live in `plugins:` above.
+# preset's shared revision, so the mask cannot live in `plugins:` above.
 # It self-selects on the recorded preset id, leaving other presets untouched.
+#
+# To keep tools beyond the built-in four, override this row from the profile
+# patch (`~/.dsh/profiles/<profile>/cordis.patch.yml`), not here — an edit to
+# this file is replaced on upgrade:
+#
+#   - id: chatmode-tool-guard
+#     config:
+#       extraTools:
+#         - advanced_search
+#         - weather
+#
+# Each name must be a globally registered tool; an unknown name is a no-op.
+# This row exports no Config schema, so there is no form in Settings for it.
 - insert:
     - id: chatmode-tool-guard
       name: '@wssdll/dsh-chat-preset/guard-tools'
